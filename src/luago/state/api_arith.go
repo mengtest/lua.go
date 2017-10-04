@@ -57,22 +57,28 @@ func (self *luaState) Arith(op ArithOp) {
 	operator := operators[op]
 
 	if operator.floatFunc == nil { // bitwise
-		if x, y, ok := _convertToIntegers(a, b); ok {
-			f := operator.integerFunc
-			self.stack.push(f(x, y))
-			return
-		}
-	} else {
-		if f := operator.integerFunc; f != nil {
-			if x, y, ok := _castToIntegers(a, b); ok {
+		if x, ok := convertToInteger(a); ok {
+			if y, ok := convertToInteger(b); ok {
+				f := operator.integerFunc
 				self.stack.push(f(x, y))
 				return
 			}
 		}
-		if x, y, ok := _convertToFloats(a, b); ok {
-			f := operator.floatFunc
-			self.stack.push(f(x, y))
-			return
+	} else { // arith
+		if f := operator.integerFunc; f != nil {
+			if x, ok := a.(int64); ok {
+				if y, ok := b.(int64); ok {
+					self.stack.push(f(x, y))
+					return
+				}
+			}
+		}
+		if x, ok := convertToFloat(a); ok {
+			if y, ok := convertToFloat(b); ok {
+				f := operator.floatFunc
+				self.stack.push(f(x, y))
+				return
+			}
 		}
 	}
 
@@ -82,37 +88,4 @@ func (self *luaState) Arith(op ArithOp) {
 	}
 
 	panic("todo: " + operator.metamethod)
-}
-
-/* integer or float */
-/* float */
-/* bitwise */
-
-/* helper */
-
-func _castToIntegers(a, b luaValue) (int64, int64, bool) {
-	if x, ok := a.(int64); ok {
-		if y, ok := b.(int64); ok {
-			return x, y, true
-		}
-	}
-	return 0, 0, false
-}
-
-func _convertToIntegers(a, b luaValue) (int64, int64, bool) {
-	if x, ok := convertToInteger(a); ok {
-		if y, ok := convertToInteger(b); ok {
-			return x, y, true
-		}
-	}
-	return 0, 0, false
-}
-
-func _convertToFloats(a, b luaValue) (float64, float64, bool) {
-	if x, ok := convertToFloat(a); ok {
-		if y, ok := convertToFloat(b); ok {
-			return x, y, true
-		}
-	}
-	return 0, 0, false
 }
