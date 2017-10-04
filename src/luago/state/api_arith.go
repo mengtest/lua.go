@@ -46,40 +46,16 @@ var operators = []operator{
 // [-(2|1), +1, e]
 // http://www.lua.org/manual/5.3/manual.html#lua_arith
 func (self *luaState) Arith(op ArithOp) {
-	var a, b luaValue
+	var b luaValue = int64(0)
 	if op != LUA_OPUNM && op != LUA_OPBNOT {
 		b = self.stack.pop()
-	} else {
-		b = int64(0)
 	}
-	a = self.stack.pop()
+	a := self.stack.pop()
 
 	operator := operators[op]
-
-	if operator.floatFunc == nil { // bitwise
-		if x, ok := convertToInteger(a); ok {
-			if y, ok := convertToInteger(b); ok {
-				f := operator.integerFunc
-				self.stack.push(f(x, y))
-				return
-			}
-		}
-	} else { // arith
-		if f := operator.integerFunc; f != nil {
-			if x, ok := a.(int64); ok {
-				if y, ok := b.(int64); ok {
-					self.stack.push(f(x, y))
-					return
-				}
-			}
-		}
-		if x, ok := convertToFloat(a); ok {
-			if y, ok := convertToFloat(b); ok {
-				f := operator.floatFunc
-				self.stack.push(f(x, y))
-				return
-			}
-		}
+	if result := _arith(a, b, operator); result != nil {
+		self.stack.push(result)
+		return
 	}
 
 	if result, ok := callMetamethod(a, b, operator.metamethod, self); ok {
@@ -88,4 +64,28 @@ func (self *luaState) Arith(op ArithOp) {
 	}
 
 	panic("todo: " + operator.metamethod)
+}
+
+func _arith(a, b luaValue, op operator) luaValue {
+	if op.floatFunc == nil { // bitwise
+		if x, ok := convertToInteger(a); ok {
+			if y, ok := convertToInteger(b); ok {
+				return op.integerFunc(x, y)
+			}
+		}
+	} else { // arith
+		if op.integerFunc != nil {
+			if x, ok := a.(int64); ok {
+				if y, ok := b.(int64); ok {
+					return op.integerFunc(x, y)
+				}
+			}
+		}
+		if x, ok := convertToFloat(a); ok {
+			if y, ok := convertToFloat(b); ok {
+				return op.floatFunc(x, y)
+			}
+		}
+	}
+	return nil
 }
