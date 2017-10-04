@@ -57,10 +57,13 @@ func (self *luaState) Arith(op ArithOp) {
 
 	if result := _arith(a, b, operator); result != nil {
 		self.stack.push(result)
-	} else if result, ok := callMetamethod(a, b, operator.metamethod, self); ok {
-		self.stack.push(result)
 	} else {
-		panic("todo: " + operator.metamethod)
+		mm := operator.metamethod
+		if result, ok := callMetamethod(a, b, mm, self); ok {
+			self.stack.push(result)
+		} else {
+			panic("todo: " + mm)
+		}
 	}
 }
 
