@@ -46,24 +46,22 @@ var operators = []operator{
 // [-(2|1), +1, e]
 // http://www.lua.org/manual/5.3/manual.html#lua_arith
 func (self *luaState) Arith(op ArithOp) {
+	operator := operators[op]
+
+	// operands
 	var b luaValue = int64(0)
 	if op != LUA_OPUNM && op != LUA_OPBNOT {
 		b = self.stack.pop()
 	}
 	a := self.stack.pop()
 
-	operator := operators[op]
 	if result := _arith(a, b, operator); result != nil {
 		self.stack.push(result)
-		return
-	}
-
-	if result, ok := callMetamethod(a, b, operator.metamethod, self); ok {
+	} else if result, ok := callMetamethod(a, b, operator.metamethod, self); ok {
 		self.stack.push(result)
-		return
+	} else {
+		panic("todo: " + operator.metamethod)
 	}
-
-	panic("todo: " + operator.metamethod)
 }
 
 func _arith(a, b luaValue, op operator) luaValue {
