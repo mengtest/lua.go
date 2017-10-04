@@ -54,31 +54,33 @@ func (self *luaState) Arith(op ArithOp) {
 	}
 	a = self.stack.pop()
 
-
 	operator := operators[op]
-	if f := operator.integerFunc; f != nil {
-		if operator.floatFunc == nil { // bitwise
-			if x, y, ok := _convertToIntegers(a, b); ok {
-				self.stack.push(f(x, y))
-				return
-			}
-		} else { // 
+
+	if operator.floatFunc == nil { // bitwise
+		if x, y, ok := _convertToIntegers(a, b); ok {
+			f := operator.integerFunc
+			self.stack.push(f(x, y))
+			return
+		}
+	} else {
+		if f := operator.integerFunc; f != nil {
 			if x, y, ok := _castToIntegers(a, b); ok {
 				self.stack.push(f(x, y))
 				return
 			}
 		}
-	}
-	if f := operator.floatFunc; f != nil {
 		if x, y, ok := _convertToFloats(a, b); ok {
+			f := operator.floatFunc
 			self.stack.push(f(x, y))
 			return
 		}
 	}
+
 	if result, ok := callMetamethod(a, b, operator.metamethod, self); ok {
 		self.stack.push(result)
 		return
 	}
+
 	panic("todo: " + operator.metamethod)
 }
 
