@@ -99,25 +99,23 @@ func (self *luaState) Len(idx int) {
 func (self *luaState) Concat(n int) {
 	if n == 0 {
 		self.stack.push("")
-	} else if n == 1 {
-		// do nothing
-	} else if n > 1 {
-		a := make([]string, n)
-		for i := 0; i < n; i++ {
-			a[n-1-i] = _popStr(self)
-		}
+	} else if n >= 2 {
+		a := _popStrs(self, n)
 		s := strings.Join(a, "")
 		self.stack.push(s)
-	} else {
-		panic("todo!")
 	}
+	// n == 1, do nothing	
 }
 
-func _popStr(ls *luaState) string {
-	if s, ok := ls.ToString(-1); ok {
-		ls.Pop(1)
-		return s
-	} else {
-		panic("todo: __concat")
+func _popStrs(ls *luaState, n int) []string {
+	a := make([]string, n)
+	for i := 0; i < n; i++ {
+		if s, ok := ls.ToString(-1); ok {
+			a[n-1-i] = s
+			ls.Pop(1)
+		} else {
+			panic("todo: __concat")
+		}
 	}
+	return a
 }
