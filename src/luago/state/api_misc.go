@@ -86,11 +86,9 @@ func (self *luaState) Len(idx int) {
 
 	switch x := val.(type) {
 	case string:
-		length := int64(len(x))
-		self.stack.push(length)
+		self.stack.push(int64(len(x)))
 	case *luaTable:
-		length := int64(x.len())
-		self.stack.push(length)
+		self.stack.push(int64(x.len()))
 	default:
 		panic("todo: len!")
 	}
