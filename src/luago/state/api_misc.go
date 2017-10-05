@@ -1,7 +1,6 @@
 package state
 
 import "runtime"
-import "strings"
 import "luago/number"
 import . "luago/api"
 
@@ -100,22 +99,16 @@ func (self *luaState) Concat(n int) {
 	if n == 0 {
 		self.stack.push("")
 	} else if n >= 2 {
-		a := _popStrs(self, n)
-		s := strings.Join(a, "")
-		self.stack.push(s)
+		result := ""
+		for i := 0; i < n; i++ {
+			if s, ok := self.ToString(-1); ok {
+				result = s + result
+				self.stack.pop()
+			} else {
+				panic("todo: __concat!")
+			}
+		}
+		self.stack.push(result)
 	}
 	// n == 1, do nothing	
-}
-
-func _popStrs(ls *luaState, n int) []string {
-	a := make([]string, n)
-	for i := 0; i < n; i++ {
-		if s, ok := ls.ToString(-1); ok {
-			a[n-1-i] = s
-			ls.Pop(1)
-		} else {
-			panic("todo: __concat")
-		}
-	}
-	return a
 }
