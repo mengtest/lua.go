@@ -17,7 +17,7 @@ var (
 	fsub = func(a, b float64) float64 { return a - b }
 	imul = func(a, b int64) int64 { return a * b }
 	fmul = func(a, b float64) float64 { return a * b }
-	fdiv = func(a, b float64) float64 { return a / b }
+	div  = func(a, b float64) float64 { return a / b }
 	iunm = func(a, _ int64) int64 { return -a }
 	funm = func(a, _ float64) float64 { return -a }
 	band = func(a, b int64) int64 { return a & b }
@@ -32,7 +32,7 @@ var operators = []operator{
 	operator{"__mul", imul, fmul},
 	operator{"__mod", number.IMod, number.FMod},
 	operator{"__pow", nil, math.Pow},
-	operator{"__div", nil, fdiv},
+	operator{"__div", nil, div},
 	operator{"__idiv", number.IFloorDiv, number.FFloorDiv},
 	operator{"__band", band, nil},
 	operator{"__bor", bor, nil},
