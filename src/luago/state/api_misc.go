@@ -104,7 +104,7 @@ func (self *luaState) Concat(n int) {
 	} else if n > 1 {
 		a := make([]string, n)
 		for i := 0; i < n; i++ {
-			a[n-1-i] = popString(self)
+			a[n-1-i] = _popStr(self)
 		}
 		s := strings.Join(a, "")
 		self.stack.push(s)
@@ -113,7 +113,7 @@ func (self *luaState) Concat(n int) {
 	}
 }
 
-func popString(ls *luaState) string {
+func _popStr(ls *luaState) string {
 	if s, ok := ls.ToString(-1); ok {
 		ls.Pop(1)
 		return s
